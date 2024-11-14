@@ -19,7 +19,7 @@ While for MiOC,
 - we generate $s_1'$, synthetic negative samples by mixing a random query $z^q$ with random negative samples$z^-$.
 - we generate the $s_2'$, synthetic negative samples by mixing a random query $z^q$ with inner One-Class SVM negative samples$z^-$.
 
-<img src="Images/MiOC.png" alt="MiOC">
+<img src="./Images/MiOC.png" alt="MiOC">
 
 Please refer to the paper for more details.
 
@@ -28,7 +28,7 @@ Please go through the [Instructions](Code/Instructions.md) for the implementatio
 
 Here are the results for the Imagenet-100 dataset. 
 
-<img src="Images/Imagenet-100.png" alt="Imagenet-100" width="400">
+<img src="./Images/Imagenet-100.png" alt="Imagenet-100" width="400">
 
 ## See Also
 We would recommend to read the 
