@@ -15,8 +15,8 @@ pip install numpy torch blobfile tqdm pyYaml pillow jaxtyping beartype pytorch-l
 
 - We use One-Class SVM to find the negative samples that are most similar to the query.
 
-- we generate $S_n$, synthetic negative samples by mixing a random query $z^q_i$ with random negative samples$z^-_i$.
-- we generate the $S_o$, synthetic negative samples by mixing a random query $z^q_i$ with inner One-Class SVM negative samples$z^-_i$.
+- we generate $S_n$, synthetic negative samples by mixing a random query  $z^q_i$ with random negative samples $z^-_i$.
+- we generate the $S_o$, synthetic negative samples by mixing a random query $z^q_i$ with inner One-Class SVM negative samples $z^-_i$.
 
 <img src="./Images/mioc.png" alt="MiOC" width="600">
 
