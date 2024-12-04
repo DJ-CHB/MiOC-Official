@@ -4,21 +4,9 @@ import random
 import numpy as np
 
 
-def hard_synthetic_negative(negative, s):
-         hard_synthetic = torch.tensor([], device=negative.device)
-         for i in range(s):
-            alpha = torch.rand(1).cuda()
-            index1  = random.randint(0, negative.shape[1]-1)
-            index2 = random.randint(0, negative.shape[1]-1)
-            syn = (alpha * negative[:, index1])+((1-alpha)*negative[:, index2])
-            norm = torch.norm(syn, p=2, dim=0, keepdim=True)
-            syn = syn / norm
-            syn = syn.unsqueeze(1)
-            hard_synthetic = torch.cat((hard_synthetic, syn), dim=1)
 
-         return hard_synthetic
-
-def harder_synthetic_negative(positive, negative, s, mix_ratio):
+def create_syn_neg(positive, negative, s, mix_ratio):
+    # During training, we create synthetic negatives with mixing random negatives and a random positive sample
 
          harder_synthetic = torch.tensor([], device=negative.device)
          negatives = torch.tensor([], device=negative.device)
@@ -47,7 +35,9 @@ def harder_synthetic_negative(positive, negative, s, mix_ratio):
          return harder_synthetic
 
 
-def warm_hard_synthetic_negative(negative, s):
+def wcreate_set1(negative, s):
+    # During warmup, we create synthetic negatives randomly mixing from the queue
+
          hard_synthetic = torch.tensor([], device=negative.device)
          for i in range(s):
             alpha = torch.rand(1).cuda()
@@ -61,7 +51,9 @@ def warm_hard_synthetic_negative(negative, s):
 
          return hard_synthetic
 
-def warm_harder_synthetic_negative(positive, negative, s, mix_ratio):
+def wcreate_set2(positive, negative, s, mix_ratio):
+    # During warmup, we create synthetic negatives randomly choosing from the queue
+    # and mixing them  with a random positive sample
 
          harder_synthetic = torch.tensor([], device=negative.device)
          negatives = torch.tensor([], device=negative.device)

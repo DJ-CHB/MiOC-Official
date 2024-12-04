@@ -7,9 +7,9 @@ import torch
 import torch.nn as nn
 from pytorch_lightning import LightningModule
 from sklearn.svm import OneClassSVM
-from utils_mochi import warm_hard_synthetic_negative, warm_harder_synthetic_negative, hard_synthetic_negative, harder_synthetic_negative
-import numpy as np
+from utils_mioc import create_syn_neg, wcreate_set1, wcreate_set2
 import random
+import numpy as np
 
 class MoCo(LightningModule):
     """
@@ -140,7 +140,7 @@ class MoCo(LightningModule):
             return self.forward_moco(im_q, im_k)
         else:
             is_warmup = self.current_epoch < self.args.mochi_warmup
-            return self.forward_mochi(im_q, im_k, is_warmup=is_warmup, step=step)
+            return self.forward_mioc(im_q, im_k, is_warmup=is_warmup, step=step)
 
     def forward_moco(self, im_q, im_k):
         """
@@ -189,8 +189,9 @@ class MoCo(LightningModule):
 
         return logits, labels
 
-    def forward_mochi(self, im_q, im_k, is_warmup: bool, step: int):
+    def forward_mioc(self, im_q, im_k, is_warmup: bool, step: int):
         """
+        MiOC Forward pass
         Input:
             im_q: a batch of query images
             im_k: a batch of key images
@@ -224,11 +225,11 @@ class MoCo(LightningModule):
 
         # region 4.1 Mixing the hardest negatives
         if is_warmup:
-            H = warm_hard_synthetic_negative(negative=self.queue, s=self.args.mochi_s)
-            H_prime = warm_harder_synthetic_negative(positive=q, negative=self.queue, s=self.args.mochi_s_prime, mix_ratio=0.5)
+            S = wcreate_set1(negative=self.queue, s=self.args.mochi_s)
+            S_prime = wcreate_set2(positive=q, negative=self.queue, s=self.args.mochi_s_prime, mix_ratio=0.5)
         else:
-            H = harder_synthetic_negative(positive=q, negative=self.queue, s=self.args.mochi_s,mix_ratio=0.5 ) # generate harder negatives from the queue
-            H_prime = harder_synthetic_negative(positive=q, negative=neg_points_inside, s=self.args.mochi_s_prime, mix_ratio=0.5) # generate harder negatives from the inner OCSVM samples
+            S = create_syn_neg(positive=q, negative=self.queue, s=self.args.mochi_s,mix_ratio=0.5 ) # generate harder negatives from the queue
+            S_prime = create_syn_neg(positive=q, negative=neg_points_inside, s=self.args.mochi_s_prime, mix_ratio=0.5) # generate harder negatives from the inner OCSVM samples
 
 
 
@@ -238,7 +239,7 @@ class MoCo(LightningModule):
         # positive logits: Nx1
         l_pos = torch.einsum("nc,nc->n", q, k).unsqueeze(-1)
         # negative are in H and H_prime
-        negatives = torch.cat((self.queue, H, H_prime), dim=1).detach()
+        negatives = torch.cat((self.queue, S, S_prime), dim=1).detach()
         l_neg = torch.einsum("nc,ck->nk", q, negatives)
 
         # logits: Nx(1+K)
